@@ -46,7 +46,15 @@ const App = () => {
           // will be useful!
           sendMessage({
             // NOTE: 'parts' will be useful
-            text: input,
+            parts: [
+              { type: 'text', text: input },
+              {
+                type: 'file',
+                url: file ? await fileToDataURL(file) : '',
+                filename: file?.name || '',
+                mediaType: file?.type || '',
+              },
+            ],
           });
 
           setInput('');

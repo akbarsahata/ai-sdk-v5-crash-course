@@ -34,11 +34,36 @@ const asXML = DATA.map(
     `<item url="${item.url}" title="${item.title}"></item>`,
 ).join('\n');
 
-const asJSON = JSON.stringify(DATA, null, 2);
+const asJSON = JSON.stringify(DATA);
 
 const asMarkdown = DATA.map(
-  (item) => `- [${item.title}](${item.url})`,
+  (item) => `- ${item.title} [click here!](${item.url})`,
 ).join('\n');
+
+// Compact JSON with short keys
+const asCompactJSON = JSON.stringify(
+  DATA.map(item => ({ u: item.url, t: item.title }))
+);
+
+// CSV format (most efficient)
+const asCSV = DATA.map(
+  (item) => `${item.title},${item.url}`
+).join('\n');
+
+// TSV (Tab-Separated Values)
+const asTSV = DATA.map(
+  (item) => `${item.title}\t${item.url}`
+).join('\n');
+
+// Compact custom format
+const asCompact = DATA.map(
+  (item) => `${item.title}|${item.url}`
+).join('\n');
+
+console.log('CSV tokens:', tokenize(asCSV).length);
+console.log('TSV tokens:', tokenize(asTSV).length);
+console.log('Compact JSON tokens:', tokenize(asCompactJSON).length);
+console.log('Compact format tokens:', tokenize(asCompact).length);
 
 console.log('Markdown tokens:', tokenize(asMarkdown).length);
 console.log(asMarkdown);
