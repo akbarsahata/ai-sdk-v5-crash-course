@@ -1,19 +1,21 @@
+import { google } from '@ai-sdk/google';
 import {
   convertToModelMessages,
   streamText,
   type UIMessage,
 } from 'ai';
-import { google } from '@ai-sdk/google';
 import {
+  appendToChatMessages,
   createChat,
   getChat,
-  appendToChatMessages,
 } from './persistence-layer.ts';
 
 export const POST = async (req: Request): Promise<Response> => {
   const body: { messages: UIMessage[]; id: string } =
     await req.json();
   const { messages, id } = body;
+
+  console.log('Received messages:', messages);
 
   const mostRecentMessage = messages[messages.length - 1];
 
@@ -27,22 +29,28 @@ export const POST = async (req: Request): Promise<Response> => {
     });
   }
 
-  const chat = TODO; // TODO: Get the existing chat
+  const chat = await getChat(id); // TODO: Get the existing chat
 
   if (!chat) {
     // TODO: If the chat doesn't exist, create it with the id
+    await createChat(id, [mostRecentMessage]);
   } else {
     // TODO: Otherwise, append the most recent message to the chat
+    await appendToChatMessages(id, [mostRecentMessage]);
   }
 
   // TODO: wait for the stream to finish and append the
   // last message to the chat
   const result = streamText({
-    model: google('gemini-2.0-flash-001'),
+    model: google('gemini-flash-latest'),
     messages: convertToModelMessages(messages),
   });
 
-  return result.toUIMessageStreamResponse();
+  return result.toUIMessageStreamResponse({
+    onFinish: async ({ responseMessage }) => {
+      await appendToChatMessages(id, [responseMessage]);
+    },
+  });
 };
 
 // http://localhost:3000/api/chat?chatId=123
