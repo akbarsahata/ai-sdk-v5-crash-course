@@ -15,20 +15,24 @@ const exemplars = [
 ];
 
 const result = await streamText({
-  model: google('gemini-2.0-flash-lite'),
-  prompt: `
-    <task-context>
-    You are a helpful assistant that can generate titles for conversations.
-    </task-context>
-
-    
-    <rules>
-    Find the most concise title that captures the essence of the conversation.
-    Titles should be at most 30 characters.
-    Titles should be formatted in sentence case, with capital letters at the start of each word. Do not provide a period at the end.
-    </rules>
-
-    ${TODO /* TODO: Add the exemplars here, formatted with XML */}
+  model: google('gemini-2.5-flash-lite'),
+  prompt: `    
+    <exemplars>
+    ${exemplars
+      .map(
+        (exemplar) => `
+      <example>
+        <conversation-history>
+        ${exemplar.input}
+        </conversation-history>
+        <expected-title>
+        ${exemplar.expected}
+        </expected-title>
+      </example>
+    `,
+      )
+      .join('\n')}
+    </exemplars>
     
     <conversation-history>
     ${INPUT}
@@ -37,10 +41,6 @@ const result = await streamText({
     <the-ask>
     Generate a title for the conversation.
     </the-ask>
-
-    <output-format>
-    Return only the title.
-    </output-format>
   `,
 });
 
