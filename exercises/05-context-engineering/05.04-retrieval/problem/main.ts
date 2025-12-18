@@ -1,6 +1,6 @@
 import { google } from '@ai-sdk/google';
-import { streamText } from 'ai';
 import { tavily } from '@tavily/core';
+import { streamText } from 'ai';
 
 const testCases = [
   {
@@ -17,10 +17,14 @@ const testCases = [
     input: 'Why is learning TypeScript important?',
     url: 'https://totaltypescript.com/',
   },
+  {
+    input: 'Apa alasan utama Ahmad Dahlan mendirikan Muhammadiyah? Jelaskan bagaimana latar belakang pendidikan dan pengalaman hidupnya mempengaruhi visi dan misi organisasi ini.',
+    url: 'https://id.wikipedia.org/wiki/Ahmad_Dahlan',
+  }
 ] as const;
 
 // Change this to try a different test case
-const TEST_CASE_TO_TRY = 0;
+const TEST_CASE_TO_TRY = 3;
 
 const { input, url } = testCases[TEST_CASE_TO_TRY];
 
@@ -39,9 +43,24 @@ if (!rawContent) {
 // TODO: Add the background data and the conversation history
 // TODO: Add some rules telling the model to use paragraphs in its output, and to use quotes from the content of the website to answer the question.
 // TODO: Add the output format telling the model to return only the summary, not any other text.
-const result = await streamText({
-  model: google('gemini-2.0-flash-lite'),
+const result = streamText({
+  model: google('gemini-2.5-flash'),
   prompt: `
+    <background-data>
+    The following is the content of a website that has been scraped for information:
+    ${rawContent}
+    </background-data>
+
+    <conversation-history>
+    User: ${input}
+    </conversation-history>
+
+    <rules>
+    - Write the response in the form of essay-style summary.
+    - Use paragraphs in your output.
+    - Use quotes from the content of the website to answer the question.
+    </rules>
+
     <task-context>
     You are a helpful assistant that summarizes the content of a URL.
     </task-context>
